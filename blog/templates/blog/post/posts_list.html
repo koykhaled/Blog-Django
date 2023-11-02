@@ -13,6 +13,7 @@ My Blog
     Published {{ post.publish }} by {{ post.auther }}
 </p>
 {{ post.body|truncatewords:30|linebreaks }}
+<a href="{% url 'blog:share' post.id %}">Share</a>
 <hr>
 {% endfor %}
 <div class="pagination">
