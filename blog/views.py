@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from .forms import EmailPostForm  , CommentsForm
 
 from taggit.models import Tag
+from django.db.models import Count
 
 from django.core.paginator import Paginator , EmptyPage,PageNotAnInteger
 from django.core.mail import send_mail
@@ -35,7 +36,12 @@ def post(request,post):
     
     form = CommentsForm()
     
-    return render(request,'blog/post/post_detail.html',{'post':post,'comments':comments,'form':form})
+    # Similiar Posts
+    post_id_tags = post.tags.values_list('id',flat=True)
+    similar_posts = Post.published.filter(tags__in=post_id_tags).exclude(id=post.id)
+    similar_posts = similar_posts.annotate(same_tags=Count('tags')).order_by('-same_tags')
+    
+    return render(request,'blog/post/post_detail.html',{'post':post,'similar_posts':similar_posts,'comments':comments,'form':form})
 
 
 
