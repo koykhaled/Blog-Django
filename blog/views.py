@@ -13,7 +13,7 @@ from django.core.paginator import Paginator , EmptyPage,PageNotAnInteger
 from django.core.mail import send_mail
 from django.conf import settings
 
-from django.contrib.postgres.search import SearchVector,SearchQuery,SearchRank
+from django.contrib.postgres.search import SearchVector,SearchQuery,SearchRank,TrigramSimilarity
 
 # Create your views here.
 def posts(request,tag_slug=None):
@@ -96,7 +96,6 @@ def post_search(request):
             search_query = SearchQuery(query)
             
             results = Post.published.annotate(
-                search=search_vector,
-                rank = SearchRank(search_vector,search_query)
-            ).filter(search=search_query).order_by('-rank')
+                    similarity=TrigramSimilarity('title', query),
+                    ).filter(similarity__gt=0.1).order_by('-similarity')
     return render(request,'blog/post/search.html',{'form':form,'results':results,'query':query})
